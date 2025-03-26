@@ -5,13 +5,15 @@ import { ChatModule } from './chat/chat.module';
 import { ConfigModule } from '@nestjs/config';
 import { LlmModule } from './llm/llm.module';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ServicesModule } from './services/services.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     MongooseModule.forRoot(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@bot.jaidp.mongodb.net/?retryWrites=true&w=majority&appName=bot`),
     ChatModule,
-    LlmModule
+    LlmModule,
+    ServicesModule
   ],
   controllers: [AppController],
   providers: [AppService],

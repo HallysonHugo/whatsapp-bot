@@ -27,8 +27,50 @@ export class ChatService {
     return user;
   }
 
+  async analyseQuestionAndGetData(question: string) {
+    const analyseQuestion = await this.llmService.analyseText(question);
 
-  async answerQuestion(question: string, phone: string, type: string) {
+    const results: { data?: any; horario?: any; localizacao?: string; servico?: any } = {};
+
+    const promises: Promise<any>[] = [];
+
+    if (analyseQuestion.data) {
+      // Buscar datas disponíveis
+      // promises.push(this.getAvailableDates().then((data) => (results.data = data)));
+      results.data = '10/10/2022';
+    }
+
+    if (analyseQuestion.horario) {
+      // Buscar horários disponíveis
+      // promises.push(this.getAvailableTimes().then((horario) => (results.horario = horario)));
+      results.horario = '14:30';
+    }
+
+    if (analyseQuestion.localizacao) {
+      // Retorna a localização fixa ou busca uma dinâmica
+      results.localizacao = 'Avenida Paulista, São Paulo';
+    }
+
+    if (analyseQuestion.servico) {
+      // Buscar lista de serviços do banco de dados
+      // promises.push(this.getServices().then((servico) => (results.servico = servico)));
+      results.servico = 'corte de cabelo';
+    }
+
+    // Espera todas as chamadas assíncronas finalizarem
+    await Promise.all(promises);
+    console.log(results);
+    return results;
+  }
+
+
+  async deleteMessages() {
+    this.chatSchema.deleteMany({}).exec();
+    return 'All messages deleted';
+  }
+
+
+  async answerQuestionGpt(question: string, phone: string, type: string) {
     const userHistory = await this.getUserHistory(phone);
     await this.chatSchema.create({ content: question, user_id: phone, role: 'user' });
     const messages: ChatCompletionMessageParam[] = userHistory.map((message) => {
@@ -37,9 +79,20 @@ export class ChatService {
         content: message.content
       } as ChatCompletionMessageParam
     });
-    const response = await this.llmService.botAnswer(question, messages);
+    const injectInformation = await this.analyseQuestionAndGetData(question);
+    const response = await this.llmService.botAnswer(question, messages, JSON.stringify(injectInformation));
     if (!response) return;
     await this.chatSchema.create({ content: response, user_id: phone, role: 'assistant' });
+    console.log(JSON.stringify(response));
+    await this.sendMessage(response, phone, type);
+  }
+
+  async answerQuestionRasa(question: string, phone: string, type: string) {
+    const userHistory = await this.getUserHistory(phone);
+    const response = await this.llmService.botResponseRasa(question);
+    if (!response) return;
+    await this.chatSchema.create({ content: response, user_id: phone, role: 'assistant' });
+    console.log(JSON.stringify(response));
     await this.sendMessage(response, phone, type);
   }
 

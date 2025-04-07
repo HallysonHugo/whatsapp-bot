@@ -35,20 +35,24 @@ export class ChatController {
   @Post('webhook')
   @HttpCode(200)
   async handleIncomingMessage(@Body() body: any) {
-    console.log('working')
-    const messages = body?.entry?.[0]?.changes?.[0].value
-    if (!messages) return;
-    const message = messages.messages?.[0];
-    const sender = messages?.contacts?.[0].wa_id;
-    if (!sender) return;
-    console.log(message.text.body)
-    switch (message.type) {
-      case 'text':
-        // this.chatService.answerQuestionGpt(message.text.body, sender, 'text');
-        this.chatService.answerQuestionRasa(message.text.body, sender, 'text');
-        return { status: 'success' };
-      default:
-        return this.chatService.sendMessage(`Tipo de mensagem não suportada ainda`, sender, 'text');
+    try {
+      const messages = body?.entry?.[0]?.changes?.[0].value
+      if (!messages) return;
+      const message = messages.messages?.[0];
+      const sender = messages?.contacts?.[0].wa_id;
+      if (!sender) return;
+      console.log(message.text.body)
+      switch (message.type) {
+        case 'text':
+          this.chatService.answerQuestionGpt(message.text.body, sender, 'text');
+          // this.chatService.answerQuestionRasa(message.text.body, sender, 'text');
+          return { status: 'success' };
+        default:
+          return this.chatService.sendMessage(`Tipo de mensagem não suportada ainda`, sender, 'text');
+      }
+    }
+    catch (e) {
+      console.log(e)
     }
   }
 

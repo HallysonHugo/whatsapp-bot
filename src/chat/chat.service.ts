@@ -37,7 +37,6 @@ export class ChatService {
     if (analyseQuestion.data) {
       // Buscar datas disponíveis
       // promises.push(this.getAvailableDates().then((data) => (results.data = data)));
-      results.data = '10/10/2022';
     }
 
     if (analyseQuestion.horario) {
@@ -88,12 +87,17 @@ export class ChatService {
   }
 
   async answerQuestionRasa(question: string, phone: string, type: string) {
-    const userHistory = await this.getUserHistory(phone);
-    const response = await this.llmService.botResponseRasa(question);
-    if (!response) return;
-    await this.chatSchema.create({ content: response, user_id: phone, role: 'assistant' });
-    console.log(JSON.stringify(response));
-    await this.sendMessage(response, phone, type);
+    try {
+      const userHistory = await this.getUserHistory(phone);
+      const response = await this.llmService.botResponseRasa(question);
+      if (!response) return;
+      await this.chatSchema.create({ content: response, user_id: phone, role: 'assistant' });
+      console.log(JSON.stringify(response));
+      await this.sendMessage(response, phone, type);
+    }
+    catch (e) {
+      console.log(e)
+    }
   }
 
 

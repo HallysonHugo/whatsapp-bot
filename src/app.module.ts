@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { LlmModule } from './llm/llm.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ServicesModule } from './services/services.module';
+import { CalendarModule } from './calendar/calendar.module';
 
 @Module({
   imports: [
@@ -13,7 +14,8 @@ import { ServicesModule } from './services/services.module';
     MongooseModule.forRoot(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@bot.jaidp.mongodb.net/?retryWrites=true&w=majority&appName=bot`),
     ChatModule,
     LlmModule,
-    ServicesModule
+    ServicesModule,
+    CalendarModule
   ],
   controllers: [AppController],
   providers: [AppService],
